@@ -110,6 +110,11 @@ vtk_libraries = ["vtkCommonCore", "vtkIOXML", "vtkIOGeometry",
 
 # Eigen needs at least C++ 14, and Moordyn itself uses C++ 17
 extra_compile_args = ["-std=c++17"]
+if platform.system() == "Windows":
+    extra_compile_args.append("/std:c++17")
+elif platform.system() == "Darwin":
+    # To avoid errors with std::filesystem::path
+    extra_compile_args.append("-mmacosx-version-min=10.15")
 definitions = [('MoorDyn_EXPORTS', '1'), ('USE_VTK', '1')]
 include_dirs = [MOORDYN_PATH, "vtk/include/vtk-" + vtk_version]
 library_dirs = ["vtk/lib"]
