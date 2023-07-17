@@ -14,6 +14,7 @@ set(MOORDYN_SRCS
     kiss_fft.cpp
     kiss_fftr.cpp
     Seafloor.cpp
+    Submergence.cpp
     Waves/WaveSpectrum.cpp
     Waves/SpectrumKin.cpp
     Waves/WaveOptions.cpp
@@ -43,6 +44,7 @@ set(MOORDYN_HEADERS
     Waves.h
     Seafloor.hpp
     Seafloor.h
+    Submergence.hpp
     Waves/WaveSpectrum.hpp
     Waves/SpectrumKin.hpp
     Waves/WaveOptions.hpp
