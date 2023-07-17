@@ -1171,9 +1171,7 @@ Rod::doRHS()
 	// 	             sinPhi * cosPhi; // Matches fortran
 	// 	Mext += Mtemp * vec(sinBeta, -cosBeta, 0.0);
 	// }
-	real mass = UnstrLen * 0.25 * pi * d * d * rho;
-	// TODO use zeta value
-	AnalyticalBuoyancyCalculator buoyancyCalculator(UnstrLen, d, r[0], q);
+	AnalyticalBuoyancyCalculator buoyancyCalculator(UnstrLen, d, r[0] - (vec3::UnitZ() * zeta_i), q);
 	auto result = buoyancyCalculator.calculateBuoyancy();
 	real buoyancyForce = env->rho_w * env->g * result.wettedVolume;
 	Fnet[0].z() += buoyancyForce;
@@ -1271,7 +1269,7 @@ Rod::doRHS()
 
 	// rod total mass, used to help with making generic inertia coefficients
 	// real mass = UnstrLen * 0.25 * pi * pi * rho;
-	// real mass = UnstrLen * 0.25 * pi * d * d * rho;
+	real mass = UnstrLen * 0.25 * pi * d * d * rho;
 
 	// Below is not needed becasue node mass matricies include node masses
 	// (lines 920-932)
