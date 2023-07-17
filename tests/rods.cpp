@@ -476,6 +476,9 @@ main(int, char**)
 		return 2;
 	if (!added_mass())
 		return 3;
+	if (!buoyancyTest()) {
+		return 4;
+	}
 
 	cout << "rods.cpp passed successfully" << endl;
 	return 0;

@@ -31,6 +31,7 @@
 #include "Rod.hpp"
 #include "Rod.h"
 #include "Line.hpp"
+#include "Submergence.hpp"
 #include "Waves.hpp"
 #include <tuple>
 
@@ -911,7 +912,8 @@ Rod::doRHS()
 	// -------------------------- loop through all the nodes
 	// -----------------------------------
 	real Lsum = 0.0;
-	double VOF0, A, zA, G, al, z1hi, z1lo;
+	// double VOF0, A, zA, G, al, z1hi, z1lo;
+	double VOF0, A, G, al, z1hi, z1lo;
 	for (unsigned int i = 0; i <= N; i++) {
 		// calculate mass matrix   <<<< can probably simplify/eliminate this...
 		real dL;  // segment length corresponding to the node
@@ -979,20 +981,20 @@ Rod::doRHS()
 
 		if (z1lo > zeta_i) {        // fully out of water
 			A = 0.0;                // area
-			zA = 0;                 // centroid depth
+			                        // zA = 0;   // centroid depth
 		} else if (z1hi < zeta_i) { // fully submerged
 			A = pi * 0.25 * d * d;
-			zA = r[i][2];
+			// zA = r[i][2];
 		} else { // if cross section crosses waterplane
 			if (abs(sinPhi) <
 			    0.001) { // if cylinder is near vertical, i.e. end is horizontal
 				A = 0.5; // <<< shouldn't this just be zero? <<<
-				zA = 0.0;
+				         // zA = 0.0;
 			} else {
 				G = (r[i][2] - zeta_i) /
 				    abs(sinPhi); //!(-z1lo+Rod%zeta(I))/abs(sinPhi)   ! distance
-				                 //! from node to waterline cross at same axial
-				                 //! location [m]
+				                 //!from node to waterline cross at same axial
+				                 //!location [m]
 				// A = 0.25*Rod%d**2*acos((Rod%d - 2.0*G)/Rod%d) -
 				// (0.5*Rod%d-G)*sqrt(Rod%d*G-G**2)  ! area of circular cross
 				// section that is below waterline [m^2] zA =
@@ -1000,8 +1002,8 @@ Rod::doRHS()
 				// for now... <<< need to double check zeta bit <<<
 				al = acos(2.0 * G / d);
 				A = d * d / 8.0 * (2.0 * al - sin(2.0 * al));
-				zA = r[i][2] - 0.6666666666 * d * pow(sin(al), 3.0) /
-				                   (2.0 * al - sin(2.0 * al));
+				// zA = r[i][2] - 0.6666666666 * d * pow(sin(al), 3.0) / (2.0*al
+				// - sin(2.0*al));
 			}
 		}
 		VOF[i] =
@@ -1163,12 +1165,20 @@ Rod::doRHS()
 	} // i - done looping through nodes
 
 	// ----- add waterplane moment of inertia moment if applicable -----
-	if ((r[0][2] < zeta_i) && (r[N][2] > zeta_i)) {
-		// the water plane is crossing the rod
-		real Mtemp = 1.0 / 16.0 * pi * d * d * d * d * env->rho_w * env->g *
-		             sinPhi * cosPhi; // Matches fortran
-		Mext += Mtemp * vec(sinBeta, -cosBeta, 0.0);
-	}
+	// if ((r[0][2] < zeta_i) && (r[N][2] > zeta_i)) {
+	// 	// the water plane is crossing the rod
+	// 	real Mtemp = 1.0 / 16.0 * pi * d * d * d * d * env->rho_w * env->g *
+	// 	             sinPhi * cosPhi; // Matches fortran
+	// 	Mext += Mtemp * vec(sinBeta, -cosBeta, 0.0);
+	// }
+	real mass = UnstrLen * 0.25 * pi * d * d * rho;
+	// TODO use zeta value
+	AnalyticalBuoyancyCalculator buoyancyCalculator(UnstrLen, d, r[0], q);
+	auto result = buoyancyCalculator.calculateBuoyancy();
+	real buoyancyForce = env->rho_w * env->g * result.wettedVolume;
+	Fnet[0].z() += buoyancyForce;
+	Mext +=
+	    (result.centerOfBuoyancy - r[0]).cross(vec3::UnitZ() * buoyancyForce);
 
 	// ============ now add in forces on end nodes from attached lines
 	// =============
@@ -1261,7 +1271,7 @@ Rod::doRHS()
 
 	// rod total mass, used to help with making generic inertia coefficients
 	// real mass = UnstrLen * 0.25 * pi * pi * rho;
-	real mass = UnstrLen * 0.25 * pi * d * d * rho;
+	// real mass = UnstrLen * 0.25 * pi * d * d * rho;
 
 	// Below is not needed becasue node mass matricies include node masses
 	// (lines 920-932)
