@@ -1010,7 +1010,7 @@ Rod::doRHS()
 		// make node mass matrix  (will be zero for zero-length Rods)
 		const mat I = mat::Identity();
 		const mat Q = q * q.transpose();
-		M[i] = m_i * I + VOF[i] * env->rho_w * v_i * (Can * (I - Q) + Cat * Q);
+		M[i] = VOF[i] * env->rho_w * v_i * (Can * (I - Q) + Cat * Q);
 
 		// mass matrices will be summed up before inversion, near end of this
 		// function
@@ -1265,17 +1265,17 @@ Rod::doRHS()
 
 	// Below is not needed becasue node mass matricies include node masses
 	// (lines 920-932)
-	// // Because the individual nodes mass matricies just include
-	// // the added mass, we have to manually compensate for the mass
-	// vec3 cg = 0.5 * UnstrLen * q;
-	// mat H = getH(cg);
-	// mat massMat = mass * mat::Identity();
-	// M6net.topLeftCorner<3, 3>() += massMat;
-	// const mat tempM1 = massMat * H;
-	// M6net.bottomLeftCorner<3, 3>() += tempM1;
-	// M6net.topRightCorner<3, 3>() += tempM1.transpose();
-	// // this mass doesn't affect the inertia matrix because
-	// // that gets handled below
+	// Because the individual nodes mass matrices just include
+	// the added mass, we have to manually compensate for the mass
+	vec3 cg = 0.5 * UnstrLen * q;
+	mat H = getH(cg);
+	mat massMat = mass * mat::Identity();
+	M6net.topLeftCorner<3, 3>() += massMat;
+	const mat tempM1 = massMat * H;
+	M6net.bottomLeftCorner<3, 3>() += tempM1;
+	M6net.topRightCorner<3, 3>() += tempM1.transpose();
+	// this mass doesn't affect the inertia matrix because
+	// that gets handled below
 
 	// add inertia terms for the Rod assuming it is uniform density (radial
 	// terms add to existing matrix which contains parallel-axis-theorem
