@@ -993,8 +993,8 @@ Rod::doRHS()
 			} else {
 				G = (r[i][2] - zeta_i) /
 				    abs(sinPhi); //!(-z1lo+Rod%zeta(I))/abs(sinPhi)   ! distance
-				                 //!from node to waterline cross at same axial
-				                 //!location [m]
+				                 //! from node to waterline cross at same axial
+				                 //! location [m]
 				// A = 0.25*Rod%d**2*acos((Rod%d - 2.0*G)/Rod%d) -
 				// (0.5*Rod%d-G)*sqrt(Rod%d*G-G**2)  ! area of circular cross
 				// section that is below waterline [m^2] zA =
@@ -1055,11 +1055,12 @@ Rod::doRHS()
 			// NOTE: There are though some unhandled situations, like free
 			// floating rods, which would horizontally surface. This is
 			// documented on docs/structure.rst
-			Ftemp = -VOF[i] * v_i * env->rho_w * env->g *
-			        sinPhi; // magnitude of radial buoyancy force at this node
-			Bo[i] = vec(Ftemp * cosBeta * cosPhi,
-			            Ftemp * sinBeta * cosPhi,
-			            -Ftemp * sinPhi);
+			// Ftemp = -VOF[i] * v_i * env->rho_w * env->g *
+			//         sinPhi; // magnitude of radial buoyancy force at this
+			//         node
+			// Bo[i] = vec(Ftemp * cosBeta * cosPhi,
+			//             Ftemp * sinBeta * cosPhi,
+			//             -Ftemp * sinPhi);
 
 			// transverse and tangential drag
 			Dp[i] = VOF[i] * 0.5 * env->rho_w * Cdn * d * dL * vp_mag * vp;
@@ -1108,15 +1109,15 @@ Rod::doRHS()
 		if ((i == 0) && (z1lo < zeta_i)) // if this is end A and it is submerged
 		{
 			// buoyancy force
-			Ftemp = -VOF[i] * Area * env->rho_w * env->g * zA;
-			Bo[i] += vec(Ftemp * cosBeta * sinPhi,
-			             Ftemp * sinBeta * sinPhi,
-			             Ftemp * cosPhi);
+			// Ftemp = -VOF[i] * Area * env->rho_w * env->g * zA;
+			// Bo[i] += vec(Ftemp * cosBeta * sinPhi,
+			//              Ftemp * sinBeta * sinPhi,
+			//              Ftemp * cosPhi);
 
 			// buoyancy moment
-			Mtemp = -VOF[i] * 1.0 / 64.0 * pi * d * d * d * d * env->rho_w *
-			        env->g * sinPhi;
-			Mext += vec(Mtemp * sinBeta, -Mtemp * cosBeta, 0.0);
+			// Mtemp = -VOF[i] * 1.0 / 64.0 * pi * d * d * d * d * env->rho_w *
+			//         env->g * sinPhi;
+			// Mext += vec(Mtemp * sinBeta, -Mtemp * cosBeta, 0.0);
 
 			// axial drag
 			Dq[i] += VOF[i] * Area * env->rho_w * CdEnd * vq_mag * vq;
@@ -1135,15 +1136,15 @@ Rod::doRHS()
 
 		if ((i == N) && (z1lo < zeta_i)) {
 			// buoyancy force
-			Ftemp = VOF[i] * Area * env->rho_w * env->g * zA;
-			Bo[i] += vec(Ftemp * cosBeta * sinPhi,
-			             Ftemp * sinBeta * sinPhi,
-			             Ftemp * cosPhi);
+			// Ftemp = VOF[i] * Area * env->rho_w * env->g * zA;
+			// Bo[i] += vec(Ftemp * cosBeta * sinPhi,
+			//              Ftemp * sinBeta * sinPhi,
+			//              Ftemp * cosPhi);
 
 			// buoyancy moment
-			Mtemp = VOF[i] * 1.0 / 64.0 * pi * d * d * d * d * env->rho_w *
-			        env->g * sinPhi;
-			Mext += vec(Mtemp * sinBeta, -Mtemp * cosBeta, 0.0);
+			// Mtemp = VOF[i] * 1.0 / 64.0 * pi * d * d * d * d * env->rho_w *
+			//         env->g * sinPhi;
+			// Mext += vec(Mtemp * sinBeta, -Mtemp * cosBeta, 0.0);
 
 			// axial drag
 			Dq[i] += VOF[i] * Area * env->rho_w * CdEnd * vq_mag * vq;
@@ -1171,7 +1172,8 @@ Rod::doRHS()
 	// 	             sinPhi * cosPhi; // Matches fortran
 	// 	Mext += Mtemp * vec(sinBeta, -cosBeta, 0.0);
 	// }
-	AnalyticalBuoyancyCalculator buoyancyCalculator(UnstrLen, d, r[0] - (vec3::UnitZ() * zeta_i), q);
+	AnalyticalBuoyancyCalculator buoyancyCalculator(
+	    UnstrLen, d, r[0] - (vec3::UnitZ() * zeta_i), q);
 	auto result = buoyancyCalculator.calculateBuoyancy();
 	real buoyancyForce = env->rho_w * env->g * result.wettedVolume;
 	Fnet[0].z() += buoyancyForce;
@@ -1295,9 +1297,9 @@ Rod::doRHS()
 		// this is just the analytical equation for moment of inertia of
 		// a uniform cylinder around its end.
 		auto r = d / 2.0;
-		// real I_r =
-		//     0.25 * mass * r * r + (1.0 / 3.0) * mass * UnstrLen * UnstrLen;
-		real I_r = mass / 12.0 * (0.75 * d * d + pow(UnstrLen / N, 2)) * N;
+		real I_r =
+		    0.25 * mass * r * r + (1.0 / 3.0) * mass * UnstrLen * UnstrLen;
+		// real I_r = mass / 12.0 * (0.75 * d * d + pow(UnstrLen / N, 2)) * N;
 
 		Imat_l(0, 0) = I_l;
 		Imat_l(1, 1) = I_r;
